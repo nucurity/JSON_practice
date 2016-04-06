@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+<head>
+    <title>Challenge 3</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://apis.google.com/js/client.js?onload=init">
+    </script>
+</head>
+<body>
+<table>
+    <tr>
+        <td>
+            <button type="button" onclick="fetchData()">fetch data</button>
+        </td>
+        <td>
+            <button type="button" onclick="clearData()">Clear</button>
+        </td>
+    </tr>
+</table>
+
+<p>
+    List:<br>
+    <span id="display"></span>
+</p>
+
+<p>
+    Counters:<br>
+<ul>
+    <li>Fuits:
+        <ul id="fruitsTotal"></ul>
+    </li>
+
+    <li>Vegetables:
+        <ul id="vegetablesTotal"></ul>
+    </li>
+</ul>
+</p>
+
+
+<script>
+    var xmlhttp = new XMLHttpRequest();
+    var url = "http://careers.intspirit.com/endpoint/data_set";
+    xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            temp = JSON.parse(xmlhttp.responseText);
+
+        }
+    };
+    xmlhttp.open("GET", url, true);
+    xmlhttp.send();
+
+    var items = new Array;
+    function fetchData() {
+
+
+        xmlhttp.onreadystatechange = function () {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                temp = JSON.parse(xmlhttp.responseText);
+
+            }
+        };
+        xmlhttp.open("GET", url, true);
+        xmlhttp.send();
+        item = {
+            itemName: temp.item,
+            itemType: temp.type
+        };
+        items[items.length] = item;
+        updateList();
+        updateCount();
+    }
+
+    function clearData() {
+        for (var i = items.length - 1; i >= 0; i--)
+            items.pop();
+        updateList();
+    }
+
+    function updateList() {
+        var list = "";
+        for (var i = 0; i < items.length; i++) {
+            list += "fetch -> {\"item\": \"" + items[i].itemName + "\", \"type\": \"" + items[i].itemType + "\"}<br>";
+        }
+        document.getElementById("display").innerHTML = list;
+    }
+
+    function updateCount() {
+        var fruits = new Array();
+        var vegetables = new Array();
+        for (var i = 0; i < items.length; i++) {
+            if (items[i].itemType.localeCompare("fruit") == 0) {
+                fruits[fruits.length] = items[i].itemName;
+            }
+            else {
+                vegetables[vegetables.length] = items[i].itemName;
+            }
+        }
+        fruits.sort();
+        vegetables.sort();
+
+        var text = "";
+        for (var i = 0; i < fruits.length; i++){
+            counter = 1;
+            for(var j = i; j < fruits.length;j++){
+                if ((j+1 != fruits.length) && (fruits[j] == fruits[j+1])) {
+                    i++;
+
+                    counter++;
+                }
+                else break;
+            }
+            text += "<li>" + counter + " " + fruits[i] + "</li>";
+        }
+
+        document.getElementById("fruitsTotal").innerHTML = text;
+
+        text = "";
+        for (var i = 0; i < vegetables.length; i++){
+            counter = 1;
+            for(var j = i; j < vegetables.length;j++){
+                if ((j+1 != vegetables.length) && (vegetables[j] == vegetables[j+1])) {
+                    i++;
+
+                    counter++;
+                }
+                else break;
+            }
+            text += "<li>" + counter + " " + vegetables[i] + "</li>";
+        }
+
+
+        document.getElementById("vegetablesTotal").innerHTML = text;
+    }
+
+
+</script>
+</body>
+</html>
