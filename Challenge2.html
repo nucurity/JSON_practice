@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>response codes</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.12.0.min.js"></script>
+
+        <style>
+            .error {
+                background-color: red;
+            }
+
+            .success {
+                background-color: green;
+            }
+        </style>
+
+    </head>
+    <body>
+        <div>
+            <button type="button" id="btnGet" onclick="getStat()">Get status</button>
+        </div>
+        
+        <p>
+            Number of errors: <span id="errCount"></span>
+        </p>
+        <p>
+            Number of successes: <span id="sucCount"></span>
+        </p>
+        <p>
+            Number of errors since the last success <span id="errsSuc"></span>
+        </p>
+        <p>
+            Percentage of the number of errors <span id="per"></span>%
+        </p>
+        <p>
+            Simple moving average <span id="SMA"></span>
+        </p>
+
+        <script>
+            var errCount = 0;
+            var sucCount = 0;
+            var errsSuc = 0;
+            var flag;
+            var status;
+            var temp;
+            var per = 0;
+            var i = 0;
+            var arr = new Array();
+            var sma = 0;
+            var xhttp = new XMLHttpRequest();
+            var url = "http://careers.intspirit.com/endpoint/response_codes";
+
+            function getStat() {
+                xhttp.onreadystatechange = function () {
+                    if (xhttp.readyState == 4 && xhttp.status == 200) {
+                        temp = JSON.parse(xhttp.responseText);
+                    }
+                };
+                xhttp.open("GET", url, true);
+                xhttp.send();
+                status = temp.text;
+                if (status.localeCompare("Success!") == 0) {
+                    success();
+                }
+                else {
+                    error();
+                }
+
+                per = errCount / (errCount + sucCount) * 100;
+                getSMA();
+                display();
+                changeColor();
+            }
+
+
+            function success() {
+                sucCount++;
+                errsSuc = 0;
+                flag = true;
+            }
+
+
+            function error() {
+                errCount++;
+                errsSuc++;
+                flag = false;
+            }
+
+            function changeColor() {
+                if (flag) {
+                    if (!$("div").hasClass("success")) {
+                        if ($("div").hasClass("error"))
+                            $("div").removeClass("error");
+                        $("div").addClass("success");
+                    }
+                }
+                else {
+                    if (!$("div").hasClass("error")) {
+                        if ($("div").hasClass("success"))
+                            $("div").removeClass("success");
+                        $("div").addClass("error");
+                    }
+                }
+            }
+
+            function display() {
+                document.getElementById("errCount").innerHTML = errCount;
+                document.getElementById("sucCount").innerHTML = sucCount;
+                document.getElementById("errsSuc").innerHTML = errsSuc;
+                document.getElementById("per").innerHTML = per.toFixed(2);
+                document.getElementById("SMA").innerHTML = sma.toFixed(2);
+            }
+
+
+            function getSMA() {
+                if (i == 2)
+                    i = 0;
+                arr[i] = per;
+                i++;
+                var sum = 0;
+                for (j = 0; j < arr.length; j++) {
+                    sum += arr[j];
+                }
+                sma = sum / arr.length;
+            }
+
+
+            window.onload = function () {
+                xhttp.onreadystatechange = function () {
+                    if (xhttp.readyState == 4 && xhttp.status == 200) {
+                        temp = JSON.parse(xhttp.responseText);
+                    }
+                };
+                xhttp.open("GET", url, true);
+                xhttp.send();
+                display();
+            }
+        </script>
+
+    </body>
+</html>
